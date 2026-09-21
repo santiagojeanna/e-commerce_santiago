@@ -1,272 +1,392 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState } from "react";
 import {
   Link,
   NavLink,
+  Navigate,
   Route,
   Routes,
   useNavigate,
-  useParams
-} from 'react-router-dom'
+  useParams,
+} from "react-router-dom";
 
-const createProductImage = (title, category) => {
-  const colors = {
-    Albums: ['#19152d', '#8b5cf6'],
-    Lightsticks: ['#111827', '#ec4899'],
-    Merchandise: ['#172554', '#3b82f6'],
-    Accessories: ['#3f1725', '#f43f5e']
-  }
-
-  const [first, second] = colors[category] || ['#171717', '#a855f7']
-
-  const svg = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="700" height="700" viewBox="0 0 700 700">
-      <defs>
-        <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stop-color="${first}"/>
-          <stop offset="100%" stop-color="${second}"/>
-        </linearGradient>
-      </defs>
-      <rect width="700" height="700" rx="40" fill="url(#g)"/>
-      <circle cx="580" cy="110" r="90" fill="rgba(255,255,255,.12)"/>
-      <circle cx="100" cy="600" r="130" fill="rgba(255,255,255,.08)"/>
-      <text x="50%" y="45%" text-anchor="middle"
-        font-family="Arial, sans-serif"
-        font-size="62"
-        font-weight="700"
-        fill="white">SEOULPOP</text>
-      <text x="50%" y="56%" text-anchor="middle"
-        font-family="Arial, sans-serif"
-        font-size="30"
-        fill="white">${title}</text>
-      <text x="50%" y="64%" text-anchor="middle"
-        font-family="Arial, sans-serif"
-        font-size="22"
-        fill="rgba(255,255,255,.8)">${category}</text>
-    </svg>
-  `
-
-  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`
-}
+import iveImage from "./assets/empathyalbum.avif";
+import strayKidsImage from "./assets/straykids.jpg";
+import blackpinkImage from "./assets/black_lightsick.jpg";
+import btsImage from "./assets/bts_lightstick.jpg";
+import twiceImage from "./assets/twice_hoodie.jpg";
+import enhypenImage from "./assets/enhypen_shirt.webp";
+import seventeenImage from "./assets/seventeen_keychain.jpg";
+import newjeansImage from "./assets/newjeans_phonecharm.webp";
+import aespaImage from "./assets/aespa_album.jpg";
+import lesserafimImage from "./assets/lesserafim_cap.png";
 
 const initialProducts = [
   {
     id: 1,
-    name: 'IVE - EMPATHY Album',
+    name: "IVE - EMPATHY Album",
     price: 1299,
-    category: 'Albums',
+    category: "Albums",
     stock: 15,
+    image: iveImage,
     description:
-      'IVE EMPATHY album featuring a stylish photobook, photocards, CD and exclusive album inclusions.'
+      "IVE EMPATHY album featuring official packaging, photocards, CD, and exclusive album inclusions.",
   },
   {
     id: 2,
-    name: 'Stray Kids - ATE Album',
+    name: "Stray Kids - ATE Album",
     price: 1399,
-    category: 'Albums',
+    category: "Albums",
     stock: 12,
+    image: strayKidsImage,
     description:
-      'Stray Kids ATE album package with collectible photocards, photobook and official album inclusions.'
+      "Official Stray Kids ATE album package with collectible photocards, photobook, and official album inclusions.",
   },
   {
     id: 3,
-    name: 'BLACKPINK Official Lightstick',
+    name: "BLACKPINK Official Lightstick",
     price: 2499,
-    category: 'Lightsticks',
+    category: "Lightsticks",
     stock: 8,
+    image: blackpinkImage,
     description:
-      'Official BLACKPINK-inspired lightstick design perfect for concerts, collections and K-pop displays.'
+      "Official BLACKPINK lightstick designed for concerts, fan events, and K-Pop collections.",
   },
   {
     id: 4,
-    name: 'BTS Army Bomb',
+    name: "BTS Army Bomb",
     price: 2799,
-    category: 'Lightsticks',
+    category: "Lightsticks",
     stock: 7,
+    image: btsImage,
     description:
-      'A collectible BTS lightstick-style item designed for ARMY collections and concert events.'
+      "Official BTS ARMY Bomb lightstick made for concerts and dedicated fan collections.",
   },
   {
     id: 5,
-    name: 'TWICE Ready To Be Hoodie',
+    name: "TWICE Ready To Be Hoodie",
     price: 1899,
-    category: 'Merchandise',
+    category: "Merchandise",
     stock: 10,
+    image: twiceImage,
     description:
-      'Comfortable TWICE-inspired hoodie with a clean concert merchandise design and relaxed fit.'
+      "Comfortable TWICE Ready To Be hoodie with a stylish design for everyday wear.",
   },
   {
     id: 6,
-    name: 'ENHYPEN Logo T-Shirt',
+    name: "ENHYPEN Logo T-Shirt",
     price: 999,
-    category: 'Merchandise',
+    category: "Merchandise",
     stock: 20,
+    image: enhypenImage,
     description:
-      'Minimal ENHYPEN-inspired shirt featuring a modern logo design suitable for everyday outfits.'
+      "Casual ENHYPEN logo T-shirt designed for everyday use by K-Pop fans.",
   },
   {
     id: 7,
-    name: 'SEVENTEEN Carat Keychain',
+    name: "SEVENTEEN Carat Keychain",
     price: 499,
-    category: 'Accessories',
+    category: "Accessories",
     stock: 25,
+    image: seventeenImage,
     description:
-      'Cute SEVENTEEN-inspired keychain accessory for bags, backpacks and personal collections.'
+      "SEVENTEEN-inspired Carat keychain perfect for bags, pouches, keys, and everyday accessories.",
   },
   {
     id: 8,
-    name: 'NewJeans Bunny Phone Charm',
+    name: "NewJeans Bunny Phone Charm",
     price: 599,
-    category: 'Accessories',
+    category: "Accessories",
     stock: 18,
+    image: newjeansImage,
     description:
-      'Playful bunny-themed phone charm inspired by the fresh and youthful K-pop aesthetic.'
+      "Cute bunny-inspired phone charm that adds a fun K-Pop touch to your everyday phone.",
   },
   {
     id: 9,
-    name: 'aespa Armageddon Album',
+    name: "aespa Armageddon Album",
     price: 1499,
-    category: 'Albums',
+    category: "Albums",
     stock: 11,
+    image: aespaImage,
     description:
-      'aespa Armageddon album with collectible packaging, photobook and official inclusions.'
+      "Official aespa Armageddon album featuring collectible packaging and album contents.",
   },
   {
     id: 10,
-    name: 'LE SSERAFIM Cap',
+    name: "LE SSERAFIM Cap",
     price: 899,
-    category: 'Merchandise',
+    category: "Merchandise",
     stock: 14,
+    image: lesserafimImage,
     description:
-      'Simple LE SSERAFIM-inspired cap that combines a casual style with K-pop merchandise.'
-  }
-].map((product) => ({
-  ...product,
-  image: createProductImage(product.name.split(' - ')[0], product.category)
-}))
+      "Stylish LE SSERAFIM-inspired cap designed for casual everyday outfits.",
+  },
+];
 
 function App() {
-  const [products] = useState(initialProducts)
-  const [cart, setCart] = useState([])
-  const [orders, setOrders] = useState([])
-  const [search, setSearch] = useState('')
-  const [category, setCategory] = useState('All')
+  const [products] = useState(initialProducts);
+  const [cart, setCart] = useState([]);
+  const [orders, setOrders] = useState([]);
+  const [accounts, setAccounts] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
+
+  const [search, setSearch] = useState("");
+  const [category, setCategory] = useState("All");
 
   const addToCart = (product) => {
     setCart((currentCart) => {
-      const existing = currentCart.find((item) => item.id === product.id)
+      const existingItem = currentCart.find(
+        (item) => item.id === product.id
+      );
 
-      if (existing) {
-        if (existing.quantity >= product.stock) {
-          return currentCart
+      if (existingItem) {
+        if (existingItem.quantity >= product.stock) {
+          return currentCart;
         }
 
         return currentCart.map((item) =>
           item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
+            ? {
+              ...item,
+              quantity: item.quantity + 1,
+            }
             : item
-        )
+        );
       }
 
-      return [...currentCart, { ...product, quantity: 1 }]
-    })
-  }
+      return [
+        ...currentCart,
+        {
+          ...product,
+          quantity: 1,
+        },
+      ];
+    });
+  };
 
   const increaseQuantity = (id) => {
     setCart((currentCart) =>
       currentCart.map((item) => {
-        const product = products.find((productItem) => productItem.id === id)
+        const product = products.find(
+          (product) => product.id === id
+        );
 
-        if (!product || item.quantity >= product.stock) {
-          return item
+        if (
+          item.id === id &&
+          product &&
+          item.quantity < product.stock
+        ) {
+          return {
+            ...item,
+            quantity: item.quantity + 1,
+          };
         }
 
-        return { ...item, quantity: item.quantity + 1 }
+        return item;
       })
-    )
-  }
+    );
+  };
 
   const decreaseQuantity = (id) => {
     setCart((currentCart) =>
       currentCart
         .map((item) =>
           item.id === id
-            ? { ...item, quantity: item.quantity - 1 }
+            ? {
+              ...item,
+              quantity: item.quantity - 1,
+            }
             : item
         )
         .filter((item) => item.quantity > 0)
-    )
-  }
+    );
+  };
 
   const removeFromCart = (id) => {
-    setCart((currentCart) => currentCart.filter((item) => item.id !== id))
-  }
+    setCart((currentCart) =>
+      currentCart.filter((item) => item.id !== id)
+    );
+  };
 
-  const cartCount = cart.reduce((total, item) => total + item.quantity, 0)
+  const cartCount = cart.reduce(
+    (total, item) => total + item.quantity,
+    0
+  );
 
   const cartTotal = cart.reduce(
-    (total, item) => total + item.price * item.quantity,
+    (total, item) =>
+      total + item.price * item.quantity,
     0
-  )
+  );
 
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
       const matchesSearch = product.name
         .toLowerCase()
-        .includes(search.toLowerCase())
+        .includes(search.toLowerCase());
 
       const matchesCategory =
-        category === 'All' || product.category === category
+        category === "All" ||
+        product.category === category;
 
-      return matchesSearch && matchesCategory
-    })
-  }, [products, search, category])
+      return matchesSearch && matchesCategory;
+    });
+  }, [products, search, category]);
+
+  const registerAccount = (account) => {
+    const existingAccount = accounts.find(
+      (item) =>
+        item.email.toLowerCase() ===
+        account.email.toLowerCase()
+    );
+
+    if (existingAccount) {
+      return {
+        success: false,
+        message:
+          "An account with this email already exists.",
+      };
+    }
+
+    setAccounts((currentAccounts) => [
+      ...currentAccounts,
+      account,
+    ]);
+
+    return {
+      success: true,
+    };
+  };
+
+  const loginAccount = (email, password) => {
+    const account = accounts.find(
+      (item) =>
+        item.email.toLowerCase() ===
+        email.toLowerCase() &&
+        item.password === password
+    );
+
+    if (!account) {
+      return {
+        success: false,
+        message: "Incorrect email or password.",
+      };
+    }
+
+    setCurrentUser(account);
+
+    return {
+      success: true,
+    };
+  };
+
+  const logoutAccount = () => {
+    setCurrentUser(null);
+    setCart([]);
+  };
 
   const placeOrder = (customer) => {
-    const order = {
-      id: `SP-${Date.now()}`,
+    const orderId = `SP-${Date.now()
+      .toString()
+      .slice(-6)}`;
+
+    const newOrder = {
+      id: orderId,
       customer,
       items: cart,
       total: cartTotal,
-      date: new Date().toLocaleString()
-    }
+      date: new Date().toLocaleString(),
+    };
 
-    setOrders((currentOrders) => [...currentOrders, order])
-    setCart([])
+    setOrders((currentOrders) => [
+      ...currentOrders,
+      newOrder,
+    ]);
 
-    return order.id
-  }
+    setCart([]);
+
+    return orderId;
+  };
 
   return (
     <div className="app">
       <header className="navbar">
-        <Link to="/" className="brand">
-          <span className="brand-icon">✦</span>
-          Seoul<span>Pop</span>
-        </Link>
+        <div className="nav-container">
+          <Link to="/" className="brand">
+            <span className="brand-star">✦</span>
+            Seoul<span>Pop</span>
+          </Link>
 
-        <nav>
-          <NavLink
-            to="/"
-            className={({ isActive }) => (isActive ? 'active' : '')}
-          >
-            Home
-          </NavLink>
+          {currentUser && (
+            <nav className="nav-links">
+              <NavLink
+                to="/"
+                className={({ isActive }) =>
+                  isActive
+                    ? "nav-link active"
+                    : "nav-link"
+                }
+              >
+                Home
+              </NavLink>
 
-          <NavLink
-            to="/cart"
-            className={({ isActive }) => (isActive ? 'active' : '')}
-          >
-            Cart
-            <span className="cart-badge">{cartCount}</span>
-          </NavLink>
+              <NavLink
+                to="/cart"
+                className={({ isActive }) =>
+                  isActive
+                    ? "nav-link active"
+                    : "nav-link"
+                }
+              >
+                Cart
+                <span className="cart-count">
+                  {cartCount}
+                </span>
+              </NavLink>
 
-          <NavLink
-            to="/checkout"
-            className={({ isActive }) => (isActive ? 'active' : '')}
-          >
-            Checkout
-          </NavLink>
-        </nav>
+              <NavLink
+                to="/checkout"
+                className={({ isActive }) =>
+                  isActive
+                    ? "nav-link active"
+                    : "nav-link"
+                }
+              >
+                Checkout
+              </NavLink>
+
+              <span className="welcome-user">
+                Hi,{" "}
+                {currentUser.fullName.split(" ")[0]}
+              </span>
+
+              <button
+                className="logout-button"
+                onClick={logoutAccount}
+              >
+                Logout
+              </button>
+            </nav>
+          )}
+
+          {!currentUser && (
+            <div className="guest-nav">
+              <Link
+                to="/login"
+                className="login-link"
+              >
+                Login
+              </Link>
+
+              <Link
+                to="/register"
+                className="register-button"
+              >
+                Register
+              </Link>
+            </div>
+          )}
+        </div>
       </header>
 
       <main>
@@ -274,63 +394,217 @@ function App() {
           <Route
             path="/"
             element={
-              <HomePage
-                products={filteredProducts}
-                search={search}
-                setSearch={setSearch}
-                category={category}
-                setCategory={setCategory}
-                addToCart={addToCart}
-              />
+              currentUser ? (
+                <HomePage
+                  products={filteredProducts}
+                  search={search}
+                  setSearch={setSearch}
+                  category={category}
+                  setCategory={setCategory}
+                  addToCart={addToCart}
+                />
+              ) : (
+                <WelcomePage />
+              )
             }
           />
 
           <Route
             path="/product/:id"
             element={
-              <ProductDetails
-                products={products}
-                addToCart={addToCart}
-              />
+              currentUser ? (
+                <ProductDetails
+                  products={products}
+                  addToCart={addToCart}
+                />
+              ) : (
+                <Navigate
+                  to="/login"
+                  replace
+                />
+              )
             }
           />
 
           <Route
             path="/cart"
             element={
-              <CartPage
-                cart={cart}
-                cartTotal={cartTotal}
-                increaseQuantity={increaseQuantity}
-                decreaseQuantity={decreaseQuantity}
-                removeFromCart={removeFromCart}
-              />
+              currentUser ? (
+                <CartPage
+                  cart={cart}
+                  cartTotal={cartTotal}
+                  increaseQuantity={
+                    increaseQuantity
+                  }
+                  decreaseQuantity={
+                    decreaseQuantity
+                  }
+                  removeFromCart={
+                    removeFromCart
+                  }
+                />
+              ) : (
+                <Navigate
+                  to="/login"
+                  replace
+                />
+              )
             }
           />
 
           <Route
             path="/checkout"
             element={
-              <CheckoutPage
-                cart={cart}
-                cartTotal={cartTotal}
-                placeOrder={placeOrder}
-                orders={orders}
-              />
+              currentUser ? (
+                <CheckoutPage
+                  cart={cart}
+                  cartTotal={cartTotal}
+                  currentUser={currentUser}
+                  placeOrder={placeOrder}
+                />
+              ) : (
+                <Navigate
+                  to="/login"
+                  replace
+                />
+              )
+            }
+          />
+
+          <Route
+            path="/login"
+            element={
+              currentUser ? (
+                <Navigate to="/" replace />
+              ) : (
+                <LoginPage
+                  loginAccount={loginAccount}
+                />
+              )
+            }
+          />
+
+          <Route
+            path="/register"
+            element={
+              currentUser ? (
+                <Navigate to="/" replace />
+              ) : (
+                <RegisterPage
+                  registerAccount={
+                    registerAccount
+                  }
+                />
+              )
             }
           />
         </Routes>
       </main>
 
-      <footer>
-        <div>
-          <strong>SeoulPop</strong>
-          <p>Your little corner for K-pop favorites.</p>
+      <footer className="footer">
+        <div className="footer-inner">
+          <div>
+            <div className="footer-brand">
+              <span>✦</span> SeoulPop
+            </div>
+
+            <p>
+              Your little corner for K-Pop
+              favorites.
+            </p>
+          </div>
+
+          <p className="copyright">
+            © 2026 SeoulPop
+          </p>
         </div>
-        <p>© 2026 SeoulPop. Front-end e-commerce project.</p>
       </footer>
     </div>
-  )
+  );
+}
+
+function WelcomePage() {
+  return (
+    <div className="welcome-page">
+      <section className="welcome-hero">
+        <div className="welcome-content">
+          <p className="eyebrow">
+            WELCOME TO SEOULPOP
+          </p>
+
+          <h1>
+            Your K-Pop collection
+            <span> starts here.</span>
+          </h1>
+
+          <p className="welcome-description">
+            Create your SeoulPop account first to
+            explore albums, lightsticks, apparel,
+            and accessories from your favorite
+            K-Pop artists.
+          </p>
+
+          <div className="welcome-actions">
+            <Link
+              to="/register"
+              className="primary-button"
+            >
+              Create an Account
+            </Link>
+
+            <Link
+              to="/login"
+              className="secondary-dark-button"
+            >
+              I Already Have an Account
+            </Link>
+          </div>
+        </div>
+
+        <div className="welcome-side">
+          <div className="side-star">✦</div>
+
+          <p>NEW DROP</p>
+
+          <h3>
+            K-POP
+            <br />
+            FAVORITES
+          </h3>
+
+          <span>
+            ALBUMS · MERCH · MORE
+          </span>
+        </div>
+      </section>
+
+      <section className="welcome-info">
+        <div>
+          <span>01</span>
+          <h3>CREATE</h3>
+          <p>
+            Register your SeoulPop account.
+          </p>
+        </div>
+
+        <div>
+          <span>02</span>
+          <h3>EXPLORE</h3>
+          <p>
+            Browse your favorite K-Pop products.
+          </p>
+        </div>
+
+        <div>
+          <span>03</span>
+          <h3>SHOP</h3>
+          <p>
+            Add items to your cart and checkout.
+          </p>
+        </div>
+      </section>
+    </div>
+  );
 }
 
 function HomePage({
@@ -339,96 +613,93 @@ function HomePage({
   setSearch,
   category,
   setCategory,
-  addToCart
+  addToCart,
 }) {
-  const [page, setPage] = useState(1)
-  const productsPerPage = 6
-
-  const totalPages = Math.max(
-    1,
-    Math.ceil(products.length / productsPerPage)
-  )
-
-  const currentPage = Math.min(page, totalPages)
-
-  const startIndex = (currentPage - 1) * productsPerPage
-  const visibleProducts = products.slice(
-    startIndex,
-    startIndex + productsPerPage
-  )
-
-  const categories = ['All', 'Albums', 'Lightsticks', 'Merchandise', 'Accessories']
-
-  const updateSearch = (value) => {
-    setSearch(value)
-    setPage(1)
-  }
-
-  const updateCategory = (value) => {
-    setCategory(value)
-    setPage(1)
-  }
+  const categories = [
+    "All",
+    "Albums",
+    "Lightsticks",
+    "Merchandise",
+    "Accessories",
+  ];
 
   return (
-    <>
-      <section className="hero">
+    <div className="shop-page">
+      <section className="shop-hero">
         <div>
-          <p className="eyebrow">WELCOME TO SEOULPOP</p>
-          <h1>
-            Your K-pop collection,
-            <br />
-            <span>starts here.</span>
-          </h1>
-          <p className="hero-text">
-            Discover albums, lightsticks, apparel and accessories made for
-            every K-pop fan.
+          <p className="eyebrow">
+            YOUR K-POP COLLECTION
           </p>
-          <a href="#products" className="hero-button">
-            Shop Collection
-          </a>
+
+          <h1>
+            Find your next
+            <span> favorite.</span>
+          </h1>
+
+          <p>
+            Official-inspired albums, lightsticks,
+            merchandise, and accessories for
+            K-Pop fans.
+          </p>
         </div>
 
-        <div className="hero-card">
-          <div className="hero-star">✦</div>
-          <p>NEW DROP</p>
-          <h2>K-POP<br />FAVORITES</h2>
-          <span>ALBUMS • MERCH • MORE</span>
+        <div className="shop-hero-mark">
+          <span>SEOUL</span>
+          <strong>POP</strong>
         </div>
       </section>
 
-      <section className="catalog" id="products">
-        <div className="section-heading">
+      <section className="products-section">
+        <div className="section-top">
           <div>
-            <p className="eyebrow">OUR COLLECTION</p>
+            <p className="eyebrow">
+              OUR COLLECTION
+            </p>
+
             <h2>Popular Picks</h2>
           </div>
 
+          <span className="result-count">
+            {products.length} products
+          </span>
+        </div>
+
+        <div className="filter-area">
           <div className="search-box">
             <span>⌕</span>
+
             <input
               type="text"
               placeholder="Search products..."
               value={search}
-              onChange={(event) => updateSearch(event.target.value)}
+              onChange={(event) =>
+                setSearch(event.target.value)
+              }
             />
+          </div>
+
+          <div className="category-buttons">
+            {categories.map((item) => (
+              <button
+                key={item}
+                className={
+                  category === item
+                    ? "category-button selected"
+                    : "category-button"
+                }
+                onClick={() =>
+                  setCategory(item)
+                }
+              >
+                {item}
+              </button>
+            ))}
           </div>
         </div>
 
-        <div className="filters">
-          {categories.map((item) => (
-            <button
-              key={item}
-              className={category === item ? 'filter active' : 'filter'}
-              onClick={() => updateCategory(item)}
-            >
-              {item}
-            </button>
-          ))}
-        </div>
-
-        {visibleProducts.length > 0 ? (
+        {products.length > 0 ? (
           <div className="product-grid">
-            {visibleProducts.map((product) => (
+            {products.map((product) => (
               <ProductCard
                 key={product.id}
                 product={product}
@@ -437,154 +708,144 @@ function HomePage({
             ))}
           </div>
         ) : (
-          <div className="empty-search">
-            <div>⌕</div>
+          <div className="no-results">
             <h3>No products found</h3>
-            <p>Try another product name or category.</p>
-          </div>
-        )}
-
-        {products.length > productsPerPage && (
-          <div className="pagination">
-            <button
-              disabled={currentPage === 1}
-              onClick={() => setPage(currentPage - 1)}
-            >
-              ←
-            </button>
-
-            {Array.from({ length: totalPages }, (_, index) => index + 1).map(
-              (number) => (
-                <button
-                  key={number}
-                  className={currentPage === number ? 'selected' : ''}
-                  onClick={() => setPage(number)}
-                >
-                  {number}
-                </button>
-              )
-            )}
-
-            <button
-              disabled={currentPage === totalPages}
-              onClick={() => setPage(currentPage + 1)}
-            >
-              →
-            </button>
+            <p>
+              Try another search or category.
+            </p>
           </div>
         )}
       </section>
-    </>
-  )
+    </div>
+  );
 }
 
 function ProductCard({ product, addToCart }) {
   return (
     <article className="product-card">
-      <Link to={`/product/${product.id}`} className="product-image-link">
-        <div className="product-image">
-          <img src={product.image} alt={product.name} />
-          {product.stock <= 8 && <span className="stock-tag">Limited</span>}
-        </div>
+      <Link
+        to={`/product/${product.id}`}
+        className="product-image"
+      >
+        <img
+          src={product.image}
+          alt={product.name}
+        />
+
+        <span className="category-tag">
+          {product.category}
+        </span>
       </Link>
 
       <div className="product-info">
-        <p className="product-category">{product.category}</p>
-
-        <Link to={`/product/${product.id}`} className="product-name">
+        <Link
+          to={`/product/${product.id}`}
+          className="product-name"
+        >
           {product.name}
         </Link>
 
-        <p className="description">{product.description}</p>
+        <p>{product.description}</p>
 
-        <div className="product-bottom">
-          <strong>₱{product.price.toLocaleString()}</strong>
+        <div className="product-footer">
+          <strong>
+            ₱{product.price.toLocaleString()}
+          </strong>
 
           <button
-            className="add-button"
+            className="add-cart-button"
             onClick={() => addToCart(product)}
-            disabled={product.stock === 0}
           >
             +
           </button>
         </div>
       </div>
     </article>
-  )
+  );
 }
 
-function ProductDetails({ products, addToCart }) {
-  const { id } = useParams()
-  const navigate = useNavigate()
+function ProductDetails({
+  products,
+  addToCart,
+}) {
+  const { id } = useParams();
+  const navigate = useNavigate();
 
-  const product = products.find((item) => item.id === Number(id))
+  const product = products.find(
+    (item) => item.id === Number(id)
+  );
 
   if (!product) {
     return (
-      <section className="not-found">
-        <h1>Product Not Found</h1>
-        <p>The product you're looking for does not exist.</p>
-        <Link to="/" className="primary-button">
-          Back to Shop
-        </Link>
-      </section>
-    )
+      <div className="content-page">
+        <div className="not-found">
+          <h2>Product not found</h2>
+
+          <button
+            className="primary-button"
+            onClick={() => navigate("/")}
+          >
+            Back to Shop
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <section className="details-page">
-      <button className="back-button" onClick={() => navigate(-1)}>
-        ← Back
+    <div className="content-page">
+      <button
+        className="back-button"
+        onClick={() => navigate(-1)}
+      >
+        ← Back to collection
       </button>
 
-      <div className="details-container">
+      <section className="details-card">
         <div className="details-image">
-          <img src={product.image} alt={product.name} />
+          <img
+            src={product.image}
+            alt={product.name}
+          />
         </div>
 
         <div className="details-content">
-          <p className="product-category">{product.category}</p>
-          <h1>{product.name}</h1>
+          <p className="eyebrow">
+            {product.category}
+          </p>
 
-          <div className="rating">★★★★★ <span>Fan favorite</span></div>
+          <h1>{product.name}</h1>
 
           <div className="details-price">
             ₱{product.price.toLocaleString()}
           </div>
 
-          <p className="full-description">{product.description}</p>
+          <p className="details-description">
+            {product.description}
+          </p>
 
-          <div className="details-stock">
-            <span className={product.stock > 0 ? 'in-stock' : 'out-stock'}>
-              ● {product.stock > 0 ? 'In Stock' : 'Out of Stock'}
-            </span>
-            {product.stock > 0 && (
-              <span>{product.stock} pieces available</span>
-            )}
+          <div className="stock-status">
+            <span></span>
+            {product.stock} items available
           </div>
 
           <button
-            className="primary-button large"
-            disabled={product.stock === 0}
+            className="primary-button full-width"
             onClick={() => addToCart(product)}
           >
             Add to Cart
           </button>
 
-          <div className="product-notes">
-            <div>
-              <strong>✓ Official-style merchandise</strong>
-              <span>Carefully selected K-pop inspired products.</span>
-            </div>
-            <div>
-              <strong>✓ Cash on Delivery</strong>
-              <span>Pay conveniently when your order arrives.</span>
-            </div>
-          </div>
+          <Link
+            to="/cart"
+            className="outline-button full-width"
+          >
+            View Cart
+          </Link>
         </div>
-      </div>
-    </section>
-  )
+      </section>
+    </div>
+  );
 }
 
 function CartPage({
@@ -592,292 +853,365 @@ function CartPage({
   cartTotal,
   increaseQuantity,
   decreaseQuantity,
-  removeFromCart
+  removeFromCart,
 }) {
-  const navigate = useNavigate()
-
-  if (cart.length === 0) {
-    return (
-      <section className="empty-cart">
-        <div className="empty-icon">♡</div>
-        <p className="eyebrow">YOUR CART</p>
-        <h1>Your cart is empty</h1>
-        <p>Add something from our collection and it will appear here.</p>
-        <Link to="/" className="primary-button">
-          Continue Shopping
-        </Link>
-      </section>
-    )
-  }
-
   return (
-    <section className="cart-page">
+    <div className="content-page">
       <div className="page-title">
-        <p className="eyebrow">YOUR COLLECTION</p>
+        <p className="eyebrow">
+          YOUR SHOPPING BAG
+        </p>
+
         <h1>Shopping Cart</h1>
       </div>
 
-      <div className="cart-layout">
-        <div className="cart-items">
-          {cart.map((item) => (
-            <div className="cart-item" key={item.id}>
-              <img src={item.image} alt={item.name} />
+      {cart.length === 0 ? (
+        <div className="empty-state">
+          <div className="empty-symbol">♡</div>
 
-              <div className="cart-item-info">
-                <p className="product-category">{item.category}</p>
-                <h3>{item.name}</h3>
-                <p>₱{item.price.toLocaleString()} each</p>
+          <h2>Your cart is empty</h2>
 
-                <div className="quantity">
-                  <button onClick={() => decreaseQuantity(item.id)}>−</button>
-                  <span>{item.quantity}</span>
-                  <button onClick={() => increaseQuantity(item.id)}>+</button>
-                </div>
-              </div>
+          <p>
+            Add something from the collection to
+            get started.
+          </p>
 
-              <div className="cart-item-right">
-                <strong>
-                  ₱{(item.price * item.quantity).toLocaleString()}
-                </strong>
-                <button
-                  className="remove-button"
-                  onClick={() => removeFromCart(item.id)}
-                >
-                  Remove
-                </button>
-              </div>
-            </div>
-          ))}
-
-          <button className="continue-button" onClick={() => navigate('/')}>
-            ← Continue Shopping
-          </button>
-        </div>
-
-        <div className="summary">
-          <p className="eyebrow">ORDER SUMMARY</p>
-          <h2>Summary</h2>
-
-          <div className="summary-row">
-            <span>Items</span>
-            <span>{cart.reduce((sum, item) => sum + item.quantity, 0)}</span>
-          </div>
-
-          <div className="summary-row">
-            <span>Subtotal</span>
-            <span>₱{cartTotal.toLocaleString()}</span>
-          </div>
-
-          <div className="summary-row">
-            <span>Delivery</span>
-            <span>FREE</span>
-          </div>
-
-          <div className="summary-total">
-            <span>Total</span>
-            <strong>₱{cartTotal.toLocaleString()}</strong>
-          </div>
-
-          <Link to="/checkout" className="checkout-button">
-            Proceed to Checkout
+          <Link
+            to="/"
+            className="primary-button"
+          >
+            Browse Collection
           </Link>
         </div>
-      </div>
-    </section>
-  )
+      ) : (
+        <div className="cart-layout">
+          <div className="cart-list">
+            {cart.map((item) => (
+              <div
+                className="cart-item"
+                key={item.id}
+              >
+                <img
+                  src={item.image}
+                  alt={item.name}
+                />
+
+                <div className="cart-item-details">
+                  <Link
+                    to={`/product/${item.id}`}
+                    className="cart-item-name"
+                  >
+                    {item.name}
+                  </Link>
+
+                  <span>{item.category}</span>
+
+                  <strong>
+                    ₱{item.price.toLocaleString()}
+                  </strong>
+                </div>
+
+                <div className="quantity">
+                  <button
+                    onClick={() =>
+                      decreaseQuantity(item.id)
+                    }
+                  >
+                    −
+                  </button>
+
+                  <span>{item.quantity}</span>
+
+                  <button
+                    onClick={() =>
+                      increaseQuantity(item.id)
+                    }
+                  >
+                    +
+                  </button>
+                </div>
+
+                <strong className="item-total">
+                  ₱
+                  {(
+                    item.price * item.quantity
+                  ).toLocaleString()}
+                </strong>
+
+                <button
+                  className="remove-item"
+                  onClick={() =>
+                    removeFromCart(item.id)
+                  }
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+
+          <aside className="order-summary">
+            <h2>Order Summary</h2>
+
+            <div>
+              <span>Items</span>
+
+              <span>
+                {cart.reduce(
+                  (total, item) =>
+                    total + item.quantity,
+                  0
+                )}
+              </span>
+            </div>
+
+            <div>
+              <span>Subtotal</span>
+
+              <span>
+                ₱{cartTotal.toLocaleString()}
+              </span>
+            </div>
+
+            <div>
+              <span>Delivery</span>
+
+              <span>Free</span>
+            </div>
+
+            <hr />
+
+            <div className="summary-total">
+              <span>Total</span>
+
+              <strong>
+                ₱{cartTotal.toLocaleString()}
+              </strong>
+            </div>
+
+            <Link
+              to="/checkout"
+              className="primary-button full-width"
+            >
+              Proceed to Checkout
+            </Link>
+          </aside>
+        </div>
+      )}
+    </div>
+  );
 }
 
-function CheckoutPage({ cart, cartTotal, placeOrder }) {
-  const navigate = useNavigate()
+function CheckoutPage({
+  cart,
+  cartTotal,
+  currentUser,
+  placeOrder,
+}) {
+  const navigate = useNavigate();
 
   const [form, setForm] = useState({
-    fullName: '',
-    email: '',
-    phone: '',
-    address: '',
-    payment: 'Cash on Delivery'
-  })
+    fullName: currentUser.fullName,
+    email: currentUser.email,
+    phone: "",
+    address: "",
+    payment: "Cash on Delivery",
+  });
 
-  const [errors, setErrors] = useState({})
-  const [successOrder, setSuccessOrder] = useState(null)
+  const [errors, setErrors] = useState({});
+  const [orderId, setOrderId] = useState("");
 
   const handleChange = (event) => {
-    const { name, value } = event.target
+    const { name, value } = event.target;
 
-    setForm((current) => ({
-      ...current,
-      [name]: value
-    }))
+    setForm((currentForm) => ({
+      ...currentForm,
+      [name]: value,
+    }));
 
-    setErrors((current) => ({
-      ...current,
-      [name]: ''
-    }))
-  }
+    setErrors((currentErrors) => ({
+      ...currentErrors,
+      [name]: "",
+    }));
+  };
 
   const validate = () => {
-    const newErrors = {}
+    const newErrors = {};
 
     if (!form.fullName.trim()) {
-      newErrors.fullName = 'Full name is required.'
-    } else if (form.fullName.trim().length < 3) {
-      newErrors.fullName = 'Please enter your complete name.'
+      newErrors.fullName =
+        "Full name is required.";
     }
 
     if (!form.email.trim()) {
-      newErrors.email = 'Email address is required.'
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
-      newErrors.email = 'Please enter a valid email address.'
+      newErrors.email =
+        "Email address is required.";
+    } else if (
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+        form.email
+      )
+    ) {
+      newErrors.email =
+        "Enter a valid email address.";
     }
 
-    const cleanPhone = form.phone.replace(/[\s-]/g, '')
+    const cleanPhone = form.phone.replace(
+      /[\s-]/g,
+      ""
+    );
 
-    if (!form.phone.trim()) {
-      newErrors.phone = 'Phone number is required.'
-    } else if (!/^(09\d{9}|\+639\d{9})$/.test(cleanPhone)) {
+    if (!cleanPhone) {
       newErrors.phone =
-        'Enter a valid Philippine mobile number, e.g. 09171234567.'
+        "Phone number is required.";
+    } else if (
+      !/^(09\d{9}|\+639\d{9})$/.test(
+        cleanPhone
+      )
+    ) {
+      newErrors.phone =
+        "Enter a valid Philippine phone number.";
     }
 
     if (!form.address.trim()) {
-      newErrors.address = 'Delivery address is required.'
-    } else if (form.address.trim().length < 10) {
-      newErrors.address = 'Please enter your complete delivery address.'
+      newErrors.address =
+        "Delivery address is required.";
     }
 
-    return newErrors
-  }
+    return newErrors;
+  };
 
   const handleSubmit = (event) => {
-    event.preventDefault()
+    event.preventDefault();
 
-    const validationErrors = validate()
+    const validationErrors = validate();
 
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors)
-      return
+    if (Object.keys(validationErrors).length) {
+      setErrors(validationErrors);
+      return;
     }
 
-    const orderId = placeOrder(form)
-    setSuccessOrder(orderId)
-  }
+    const newOrderId = placeOrder(form);
+    setOrderId(newOrderId);
+  };
 
-  if (successOrder) {
+  if (orderId) {
     return (
-      <section className="success-page">
-        <div className="success-icon">✓</div>
-        <p className="eyebrow">ORDER CONFIRMED</p>
-        <h1>Thank you for your order!</h1>
-        <p>
-          Your SeoulPop order has been successfully placed.
-        </p>
+      <div className="content-page">
+        <div className="success-state">
+          <div className="success-symbol">
+            ✓
+          </div>
 
-        <div className="order-number">
-          Order Number
-          <strong>{successOrder}</strong>
+          <p className="eyebrow">
+            ORDER CONFIRMED
+          </p>
+
+          <h1>Thank You!</h1>
+
+          <p>
+            Your SeoulPop order has been placed
+            successfully.
+          </p>
+
+          <div className="order-number">
+            <span>Order Number</span>
+
+            <strong>{orderId}</strong>
+          </div>
+
+          <button
+            className="primary-button"
+            onClick={() => navigate("/")}
+          >
+            Continue Shopping
+          </button>
         </div>
-
-        <p className="success-note">
-          Payment method: Cash on Delivery
-        </p>
-
-        <button className="primary-button" onClick={() => navigate('/')}>
-          Back to Home
-        </button>
-      </section>
-    )
+      </div>
+    );
   }
 
   if (cart.length === 0) {
     return (
-      <section className="empty-cart">
-        <div className="empty-icon">♡</div>
-        <p className="eyebrow">CHECKOUT</p>
-        <h1>No items to checkout</h1>
-        <p>Add products to your cart before proceeding.</p>
-        <Link to="/" className="primary-button">
-          Shop Now
-        </Link>
-      </section>
-    )
+      <div className="content-page">
+        <div className="empty-state">
+          <h2>Your cart is empty</h2>
+
+          <Link
+            to="/"
+            className="primary-button"
+          >
+            Browse Collection
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <section className="checkout-page">
+    <div className="content-page">
       <div className="page-title">
-        <p className="eyebrow">ALMOST THERE</p>
+        <p className="eyebrow">
+          COMPLETE YOUR ORDER
+        </p>
+
         <h1>Checkout</h1>
       </div>
 
       <div className="checkout-layout">
-        <form className="checkout-form" onSubmit={handleSubmit}>
+        <form
+          className="checkout-form"
+          onSubmit={handleSubmit}
+        >
           <div className="form-section">
-            <h2>Customer Information</h2>
-            <p>Enter your details for delivery.</p>
+            <h2>Delivery Information</h2>
+
+            <FormInput
+              label="Full Name"
+              name="fullName"
+              value={form.fullName}
+              onChange={handleChange}
+              placeholder="Enter your full name"
+              error={errors.fullName}
+            />
+
+            <FormInput
+              label="Email Address"
+              name="email"
+              type="email"
+              value={form.email}
+              onChange={handleChange}
+              placeholder="Enter your email"
+              error={errors.email}
+            />
+
+            <FormInput
+              label="Phone Number"
+              name="phone"
+              type="tel"
+              value={form.phone}
+              onChange={handleChange}
+              placeholder="09XXXXXXXXX"
+              error={errors.phone}
+            />
 
             <div className="form-group">
-              <label htmlFor="fullName">Full Name *</label>
-              <input
-                id="fullName"
-                name="fullName"
-                type="text"
-                value={form.fullName}
-                onChange={handleChange}
-                placeholder="Juan Dela Cruz"
-                className={errors.fullName ? 'input-error' : ''}
-              />
-              {errors.fullName && (
-                <small className="error-message">{errors.fullName}</small>
-              )}
-            </div>
+              <label htmlFor="address">
+                Delivery Address
+              </label>
 
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="email">Email Address *</label>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  value={form.email}
-                  onChange={handleChange}
-                  placeholder="juan@email.com"
-                  className={errors.email ? 'input-error' : ''}
-                />
-                {errors.email && (
-                  <small className="error-message">{errors.email}</small>
-                )}
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="phone">Phone Number *</label>
-                <input
-                  id="phone"
-                  name="phone"
-                  type="tel"
-                  value={form.phone}
-                  onChange={handleChange}
-                  placeholder="09171234567"
-                  className={errors.phone ? 'input-error' : ''}
-                />
-                {errors.phone && (
-                  <small className="error-message">{errors.phone}</small>
-                )}
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="address">Delivery Address *</label>
               <textarea
                 id="address"
                 name="address"
+                rows="4"
                 value={form.address}
                 onChange={handleChange}
-                placeholder="House number, street, barangay, city, province"
-                rows="4"
-                className={errors.address ? 'input-error' : ''}
+                placeholder="Enter your complete delivery address"
               />
+
               {errors.address && (
-                <small className="error-message">{errors.address}</small>
+                <span className="error">
+                  {errors.address}
+                </span>
               )}
             </div>
           </div>
@@ -890,51 +1224,379 @@ function CheckoutPage({ cart, cartTotal, placeOrder }) {
                 type="radio"
                 name="payment"
                 value="Cash on Delivery"
-                checked={form.payment === 'Cash on Delivery'}
+                checked={
+                  form.payment ===
+                  "Cash on Delivery"
+                }
                 onChange={handleChange}
               />
 
-              <span>
-                <strong>Cash on Delivery</strong>
-                <small>Pay when your order arrives.</small>
-              </span>
+              <div>
+                <strong>
+                  Cash on Delivery
+                </strong>
+
+                <span>
+                  Pay when your order arrives.
+                </span>
+              </div>
             </label>
           </div>
 
-          <button type="submit" className="checkout-button submit">
+          <button
+            type="submit"
+            className="primary-button full-width"
+          >
             Place Order
           </button>
         </form>
 
-        <div className="checkout-summary">
-          <p className="eyebrow">YOUR ORDER</p>
-          <h2>Order Summary</h2>
+        <aside className="checkout-summary">
+          <h2>Your Order</h2>
 
           {cart.map((item) => (
-            <div className="mini-item" key={item.id}>
-              <img src={item.image} alt={item.name} />
+            <div
+              className="checkout-item"
+              key={item.id}
+            >
+              <img
+                src={item.image}
+                alt={item.name}
+              />
 
               <div>
                 <strong>{item.name}</strong>
+
                 <span>
-                  {item.quantity} × ₱{item.price.toLocaleString()}
+                  Qty: {item.quantity}
                 </span>
               </div>
 
               <strong>
-                ₱{(item.price * item.quantity).toLocaleString()}
+                ₱
+                {(
+                  item.price * item.quantity
+                ).toLocaleString()}
               </strong>
             </div>
           ))}
 
-          <div className="summary-total checkout-total">
+          <hr />
+
+          <div className="summary-total">
             <span>Total</span>
-            <strong>₱{cartTotal.toLocaleString()}</strong>
+
+            <strong>
+              ₱{cartTotal.toLocaleString()}
+            </strong>
           </div>
-        </div>
+        </aside>
       </div>
-    </section>
-  )
+    </div>
+  );
 }
 
-export default App
+function FormInput({
+  label,
+  name,
+  type = "text",
+  value,
+  onChange,
+  placeholder,
+  error,
+}) {
+  return (
+    <div className="form-group">
+      <label htmlFor={name}>{label}</label>
+
+      <input
+        id={name}
+        name={name}
+        type={type}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+      />
+
+      {error && (
+        <span className="error">{error}</span>
+      )}
+    </div>
+  );
+}
+
+function LoginPage({ loginAccount }) {
+  const navigate = useNavigate();
+
+  const [form, setForm] = useState({
+    email: "",
+    password: "",
+  });
+
+  const [error, setError] = useState("");
+
+  const handleChange = (event) => {
+    setForm({
+      ...form,
+      [event.target.name]: event.target.value,
+    });
+
+    setError("");
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+
+    if (!form.email.trim() || !form.password) {
+      setError(
+        "Please enter your email and password."
+      );
+      return;
+    }
+
+    const result = loginAccount(
+      form.email,
+      form.password
+    );
+
+    if (!result.success) {
+      setError(result.message);
+      return;
+    }
+
+    navigate("/");
+  };
+
+  return (
+    <div className="auth-page">
+      <div className="auth-card">
+        <div className="auth-logo">
+          <span>✦</span> SeoulPop
+        </div>
+
+        <p className="eyebrow">
+          WELCOME BACK
+        </p>
+
+        <h1>Login</h1>
+
+        <p className="auth-description">
+          Sign in to access your SeoulPop
+          collection.
+        </p>
+
+        <form onSubmit={handleSubmit}>
+          <FormInput
+            label="Email Address"
+            name="email"
+            type="email"
+            value={form.email}
+            onChange={handleChange}
+            placeholder="Enter your email"
+          />
+
+          <FormInput
+            label="Password"
+            name="password"
+            type="password"
+            value={form.password}
+            onChange={handleChange}
+            placeholder="Enter your password"
+          />
+
+          {error && (
+            <div className="auth-error">
+              {error}
+            </div>
+          )}
+
+          <button
+            type="submit"
+            className="primary-button full-width"
+          >
+            Login
+          </button>
+        </form>
+
+        <p className="auth-footer">
+          Don't have an account?{" "}
+          <Link to="/register">
+            Create an account
+          </Link>
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function RegisterPage({
+  registerAccount,
+}) {
+  const navigate = useNavigate();
+
+  const [form, setForm] = useState({
+    fullName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+
+  const [errors, setErrors] = useState({});
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+
+    setForm((currentForm) => ({
+      ...currentForm,
+      [name]: value,
+    }));
+
+    setErrors((currentErrors) => ({
+      ...currentErrors,
+      [name]: "",
+    }));
+  };
+
+  const validate = () => {
+    const newErrors = {};
+
+    if (!form.fullName.trim()) {
+      newErrors.fullName =
+        "Full name is required.";
+    }
+
+    if (!form.email.trim()) {
+      newErrors.email =
+        "Email address is required.";
+    } else if (
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+        form.email
+      )
+    ) {
+      newErrors.email =
+        "Enter a valid email address.";
+    }
+
+    if (!form.password) {
+      newErrors.password =
+        "Password is required.";
+    } else if (form.password.length < 6) {
+      newErrors.password =
+        "Password must be at least 6 characters.";
+    }
+
+    if (!form.confirmPassword) {
+      newErrors.confirmPassword =
+        "Please confirm your password.";
+    } else if (
+      form.password !== form.confirmPassword
+    ) {
+      newErrors.confirmPassword =
+        "Passwords do not match.";
+    }
+
+    return newErrors;
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+
+    const validationErrors = validate();
+
+    if (Object.keys(validationErrors).length) {
+      setErrors(validationErrors);
+      return;
+    }
+
+    const result = registerAccount({
+      fullName: form.fullName,
+      email: form.email,
+      password: form.password,
+    });
+
+    if (!result.success) {
+      setErrors({
+        email: result.message,
+      });
+      return;
+    }
+
+    navigate("/login");
+  };
+
+  return (
+    <div className="auth-page">
+      <div className="auth-card register-card">
+        <div className="auth-logo">
+          <span>✦</span> SeoulPop
+        </div>
+
+        <p className="eyebrow">
+          JOIN SEOULPOP
+        </p>
+
+        <h1>Create Account</h1>
+
+        <p className="auth-description">
+          Register first to explore our K-Pop
+          collection.
+        </p>
+
+        <form onSubmit={handleSubmit}>
+          <FormInput
+            label="Full Name"
+            name="fullName"
+            value={form.fullName}
+            onChange={handleChange}
+            placeholder="Enter your full name"
+            error={errors.fullName}
+          />
+
+          <FormInput
+            label="Email Address"
+            name="email"
+            type="email"
+            value={form.email}
+            onChange={handleChange}
+            placeholder="Enter your email"
+            error={errors.email}
+          />
+
+          <FormInput
+            label="Password"
+            name="password"
+            type="password"
+            value={form.password}
+            onChange={handleChange}
+            placeholder="At least 6 characters"
+            error={errors.password}
+          />
+
+          <FormInput
+            label="Confirm Password"
+            name="confirmPassword"
+            type="password"
+            value={form.confirmPassword}
+            onChange={handleChange}
+            placeholder="Re-enter your password"
+            error={errors.confirmPassword}
+          />
+
+          <button
+            type="submit"
+            className="primary-button full-width"
+          >
+            Create Account
+          </button>
+        </form>
+
+        <p className="auth-footer">
+          Already have an account?{" "}
+          <Link to="/login">Login</Link>
+        </p>
+      </div>
+    </div>
+  );
+}
+
+export default App;
